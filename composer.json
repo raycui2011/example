@@ -1,0 +1,22 @@
+{
+    "name": "raycui/example",
+    "description": "dev task",
+    "license": "MIT",
+    "keywords": ["example"],
+    "authors": [
+        {
+            "name": "Ray Cui",
+            "email": "cuidream@hotmail.com"
+        }
+    ],
+    "require": {},
+    "require-dev": {
+        "phpunit/phpunit": "4.0.*",
+	"components/jquery": "1.9.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "raycui\\example\\": "src"
+        }
+    }
+}
