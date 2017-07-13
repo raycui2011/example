@@ -78,33 +78,42 @@ class Contact {
 	
 	return $result;
     }
-    
-    public function create($first_name, $last_name, $mobile, $email, $post_code) {
-	//$query = 'insert into contacts `first_name`,'
-	$stmt = $this->conn->prepare("insert into contacts (first_name, last_name, mobile, email, created_at, modified_at, post_code)"
-		. "values (:first_name, :last_name, :mobile, :email, :created_at, :modified_at, :post_code)");
-	$stmt->bindParam(':first_name', $first_name);
-	$stmt->bindParam(':last_name', $last_name);
-	$stmt->bindParam(':mobile', $mobile);
-	$stmt->bindParam(':email', $email);
-	//$stmt->bindParam(':deleted', 0);
-	$stmt->bindParam(':created_at', date('Y-m-d H:i:s'));
-	$stmt->bindParam(':modified_at', date('Y-m-d H:i:s'));
-	$stmt->bindParam(':post_code', $post_code);
-	
-	if ($stmt->execute()) {
-	    $id = $this->conn->lastInsertId();
-	    $arr_json = ['id' => $id, 'first_name' => $first_name, 'last_name' => $last_name, 'mobile' => $mobile, 'email' => $email,
-	    'created_at' => date('Y-m-d H:i:s'), 'modified_at' => date('Y-m-d H:i:s'), 'post_code' => $post_code];
-	    $json = json_encode($arr_json);
-	    $stmt = $this->conn->prepare('update contacts set json_text = :json_data where id = :id');
-	    $stmt->bindParam(':json_data', $json);
-	    $stmt->bindParam(':id', $id);
-	   
-	   return $stmt->execute();
-	} else {
-	    return false;
+	public function listContacts() {
+		$stmt = $this->conn->prepare("select * from contact where deleted = :deleted");
+		$deleted = 0;
+		$stmt->bindParam(':deleted', $deleted);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		
+		return json_encode($result);
 	}
+	
+    public function create($first_name, $last_name, $mobile, $email, $post_code) {
+		//$query = 'insert into contacts `first_name`,'
+		$stmt = $this->conn->prepare("insert into contacts (first_name, last_name, mobile, email, created_at, modified_at, post_code)"
+			. "values (:first_name, :last_name, :mobile, :email, :created_at, :modified_at, :post_code)");
+		$stmt->bindParam(':first_name', $first_name);
+		$stmt->bindParam(':last_name', $last_name);
+		$stmt->bindParam(':mobile', $mobile);
+		$stmt->bindParam(':email', $email);
+		//$stmt->bindParam(':deleted', 0);
+		$stmt->bindParam(':created_at', date('Y-m-d H:i:s'));
+		$stmt->bindParam(':modified_at', date('Y-m-d H:i:s'));
+		$stmt->bindParam(':post_code', $post_code);
+
+		if ($stmt->execute()) {
+			$id = $this->conn->lastInsertId();
+			$arr_json = ['id' => $id, 'first_name' => $first_name, 'last_name' => $last_name, 'mobile' => $mobile, 'email' => $email,
+			'created_at' => date('Y-m-d H:i:s'), 'modified_at' => date('Y-m-d H:i:s'), 'post_code' => $post_code];
+			$json = json_encode($arr_json);
+			$stmt = $this->conn->prepare('update contacts set json_text = :json_data where id = :id');
+			$stmt->bindParam(':json_data', $json);
+			$stmt->bindParam(':id', $id);
+
+		   return $stmt->execute();
+		} else {
+			return false;
+		}
     }
     
     public function addJsonData($id) {
@@ -148,8 +157,16 @@ class Contact {
 	
     }
     
-    public function delete() {
-	
+    public function softDelete($id) {
+		if ($id) {
+			$deleted = 1;
+			$stmt = $this->conn->prepare("update contacts set deleted = :deleted where id = :id");
+			$stmt->bindParam(':id', $id);
+			$stmt->bindParam(':deleted', $deleted);
+			return $stmt->execute();
+		} else {
+			return false;
+		}
     }
     
 }

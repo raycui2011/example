@@ -11,17 +11,17 @@ include_once 'objects/Contact.php';
 
 <div class="clearfix"></div><br />
 
-<div class="container">
-     <table class='table table-bordered table-responsive'>
-     <tr>
-	<th>#</th>
-	<th>First Name</th>
-	<th>Last Name</th>
-	<th>Mobile</th>
-	<th>Email</th>
-	<th>Post Code</th>
-	<th colspan="2" align="center">Actions</th>
-     </tr>
+<div class="container" id="contacts_block" ng-controller = "contactController">
+    <table class='table table-bordered table-responsive'>
+	<tr>
+	   <th>#</th>
+	   <th>First Name</th>
+	   <th>Last Name</th>
+	   <th>Mobile</th>
+	   <th>Email</th>
+	   <th>Post Code</th>
+	   <th colspan="2" align="center">Actions</th>
+	</tr>
      <?php
   $query = "SELECT * FROM contacts";
   $oContact = new Contact();
@@ -30,7 +30,7 @@ include_once 'objects/Contact.php';
   //$newquery = $crud->paging($query,$records_per_page);
   //$crud->dataview($newquery);
   
-  foreach ($result as $contact) {
+  /*foreach ($result as $contact) {
       echo '<tr>'
 	    . '<td>' . $contact['id'] . '</td>' 
 	    . '<td>' . $contact['first_name'] . '</td><td>' .
@@ -38,12 +38,18 @@ include_once 'objects/Contact.php';
 	      $contact['mobile'] . '</td><td>' . 
 	      $contact['email'];
       echo '</td><td>' . $contact['post_code']. '</td>';
-      echo '<td> <a><span name="delete-'.$contact['id'].'" data-value=" '. $contact['id'] . '"  class="glyphicon glyphicon-remove">delete</span></a>';
+      echo '<td> <a><span name="delete-'.$contact['id'].'" data-value="'. $contact['id'] . '"  class="glyphicon glyphicon-remove">delete</span></a>';
       echo ' <a href="edit-contact.php?id='.$contact['id'].'"><span name="edit-'.$contact['id'].'" data-value=" '. $contact['id'] . '"  class="glyphicon glyphicon-edit">edit</span></a></td>';
       echo '</tr>';
-  }
+  }*/
   ?>
-    <tr>
+	<tr ng-repeat="con in contacts">
+		<td></td>
+		<td></td>
+		<td></td>
+		<td></td>
+	</tr>
+  <tr>
         <td colspan="7" align="center">
     <div class="pagination-wrap">
             <?php //$crud->paginglink($query,$records_per_page); ?>
@@ -53,25 +59,37 @@ include_once 'objects/Contact.php';
  
 </table>
    
-       
+    <div id="error-message"></div>     
 </div>
 <script>
-    jQuery( "span[name*='delete-']" ).on('click', function() {
-	var id = $(this).attr('data-value');
-	event.preventDefault();
-	$.ajax({
-	    url : '/edit-contact.php',
-	    type: "POST",
-	    data : {id: id, action:'delete'},
-	    success: function(data, textStatus, jqXHR)
-	    {
-		window.location.reload()
-	    },
-	    error: function (jqXHR, textStatus, errorThrown)
-	    {
+	//$( document ).ready(function() {
+		$(function(){
+			$(document).on('click', '.glyphicon-remove', function() {
+				var id = $(this).attr('data-value');
+				//console.log(id);
+				//event.preventDefault();
+				var $self = $(this);
+				console.log($self);
+				$.ajax({
+					url : 'delete-contact.php',
+					type: 'POST',
+					data : {id: id, delete:'delete'},
+					success: function(data, textStatus, jqXHR)
+					{
+					//$(document).ready(function() {
+						//console.log(data);
+						$('#contacts_block').html(data);
+					//});
 
-	    }
-	});
-    });
+					},
+					error: function (jqXHR, textStatus, errorThrown)
+					{
+					console.log('something is wrong!');
+					$('#error-message').html(textStatus);
+					}
+				});
+			});
+		});
+	//});
 </script>
 <?php include_once 'footer.php'; ?>
